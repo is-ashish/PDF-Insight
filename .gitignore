@@ -9,10 +9,17 @@ wheels/
 # Virtual environments
 .venv
 
-#vector store metadata
+# Ignore everything inside vectorstore/
 vectorstore/*
 
-#datasource for pdf
+# But keep the folder itself
+!vectorstore/.gitkeep
+
+# Ignore everything inside datasource/
 datasource/*
+
+# But keep the folder itself
+!datasource/.gitkeep
+
 
 .env
