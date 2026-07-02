@@ -6,7 +6,6 @@ from pathlib import Path
 import os
 
 
-
 if __name__ == "__main__":
     # Always ingest and overwrite vectorstore if documents change
     print("📄 Starting ingestion pipeline...")
@@ -15,6 +14,12 @@ if __name__ == "__main__":
     
     documents = []
     PDF_PATH = Path(PDF_PATH)
+    
+    print("no of contents -:", len(os.listdir(PDF_PATH)))
+    
+    if len(os.listdir(PDF_PATH)) == 0:
+        raise FileExistsError("Please Add Pdf files ....")
+        
     for file in os.listdir(PDF_PATH):
         if file.endswith(".pdf"):
             file_name = PDF_PATH/file

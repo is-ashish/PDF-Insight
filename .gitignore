@@ -10,12 +10,9 @@ wheels/
 .venv
 
 #vector store metadata
-vectorstore/
+vectorstore/*
 
 #datasource for pdf
-datasource/
+datasource/*
 
 .env
-
-# *.pkl
-# *.faiss
