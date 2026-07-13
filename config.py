@@ -25,6 +25,3 @@ PDF_PATH = os.path.join(BASE_DIR, "datasource")
 
 
 # print(type(PDF_PATH), "TYPE OF FILE")
-
-
-

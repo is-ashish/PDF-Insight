@@ -28,7 +28,7 @@ tracer = LangChainTracer(
 
 @app.get("/")
 def welcome():
-    return {"message": "Welcome to DataCenter Chat Bot.."}
+    return {"message": "Welcome to PDF Chat Bot.."}
 
 class Query(BaseModel):
     question: str
@@ -45,15 +45,18 @@ else:
 @app.post("/chat")
 def chat(query: Query):
     # Pass tracer as a list in callbacks config
-    response = chain.invoke(
-        query.question,
-        config={
-            "callbacks": [tracer],
-            "metadata": {
-                "user_input": query.question,
-                "endpoint": "/chat"
-            },
-            "tags": ["production", "customer-support"]
+    res = chain(query.question)
+    #     query.question,
+    #     config={
+    #         "callbacks": [tracer],
+    #         "metadata": {
+    #             "user_input": query.question,
+    #             "endpoint": "/chat"
+    #         },
+    #         "tags": ["production", "customer-support"]
+    #     }
+    # )
+    return {
+        "answer": res["response"],
+        "documents": res["documents"]
         }
-    )
-    return {"answer": response}

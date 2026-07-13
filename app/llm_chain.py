@@ -1,7 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
+# from langchain_core.runnables import RunnablePassthrough
+# from langchain_core.output_parsers import StrOutputParser
 from config import GROQ_API_KEY
 from langsmith import traceable
 from langsmith.run_helpers import get_current_run_tree
@@ -48,36 +48,36 @@ def build_chain(vectorstore, threshold=2):
     #     search_kwargs={"k": 5}  # retrieve top 5
     # )
 
-    def context_builder(question):
-        
+    def context_builder(question:str):
         # Step 1: similarity search with scores
         results = vectorstore.similarity_search_with_score(
             question,
             k=5,
-            # filter = extract_metadata_filter(question) #extract_metadata_filter.(question)
         )
-
-        # Step 2: log retrieved docs + scores to LangSmith
+        # --------------- Tracing ----------------
+        #log retrieved docs + scores to LangSmith
         run_tree = get_current_run_tree()
         if run_tree:
             run_tree.metadata.update({
-                "retrieved_docs": [doc.page_content for doc, score in results],
-                "scores": [score for doc, score in results],
-                "metadata": [doc.metadata for doc, score in results]                
+                "retrieved_docs": [doc.page_content for doc, _ in results],
+                "scores": [score for _, score in results],
+                "metadata": [doc.metadata for doc, _ in results]                
             })
+        # ----------------------------------------
 
         # Step 2: apply score threshold
         filtered = [doc for doc, score in results if score <= threshold]
         
         if not filtered:
-            return ""   # empty context → triggers "I don't know"
-        return "\n\n".join(d.page_content for d in filtered)
+            return "", []   # empty context → triggers "I don't know"
+        return "\n\n".join(d.page_content for d in filtered), filtered
 
-    chain = (
-        {"context": RunnablePassthrough() | context_builder,
-         "question": RunnablePassthrough()}
-        | prompt
-        | llm
-        | StrOutputParser()
-    )
-    return chain
+    def run_chain(question: str):
+        context, document  = context_builder(question)
+        answer_By_LLM = llm.invoke(prompt.format(context=context, question=question)).content
+        return {
+            "response": answer_By_LLM.strip(),
+            "documents": document
+        }
+    
+    return run_chain
